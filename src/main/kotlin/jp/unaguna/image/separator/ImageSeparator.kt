@@ -8,6 +8,7 @@ import java.awt.image.BufferedImage
 import java.nio.file.Path
 import javax.imageio.ImageIO
 import kotlin.io.path.Path
+import kotlin.io.path.absolute
 import kotlin.io.path.extension
 import kotlin.io.path.nameWithoutExtension
 
@@ -33,7 +34,7 @@ class ImageSeparator {
 
             val inputPathStr by parser.argument(ArgType.String, fullName = "input_path").vararg()
 
-            val inputPaths by lazy { inputPathStr.map{ Path(it) } }
+            val inputPaths by lazy { inputPathStr.map{ Path(it).absolute() } }
 
             init {
                 parser.parse(args)
