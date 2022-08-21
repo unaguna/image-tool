@@ -2,10 +2,10 @@ package jp.unaguna.image.separator
 
 import jakarta.validation.Validation
 import jakarta.validation.constraints.Min
-import jakarta.validation.constraints.NotBlank
 import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
 import kotlinx.cli.default
+import kotlinx.cli.vararg
 import java.awt.image.BufferedImage
 import java.nio.file.Path
 import javax.imageio.ImageIO
@@ -19,7 +19,9 @@ class ImageSeparator {
         fun main(args_: Array<String>) {
             val args = Args(args_)
 
-            separateOneImage(args.inputPath, args.colNum, args.rowNum, args.reverseCol)
+            for(inputPath in args.inputPaths) {
+                separateOneImage(inputPath, args.colNum, args.rowNum, args.reverseCol)
+            }
         }
 
         private class Args(args: Array<String>) {
@@ -33,10 +35,9 @@ class ImageSeparator {
 
             val reverseCol by parser.option(ArgType.Boolean, fullName = "reverse-col").default(false)
 
-            @get:NotBlank(message = "input_path must not be blank")
-            val inputPathStr by parser.argument(ArgType.String, fullName = "input_path")
+            val inputPathStr by parser.argument(ArgType.String, fullName = "input_path").vararg()
 
-            val inputPath by lazy { Path(inputPathStr) }
+            val inputPaths by lazy { inputPathStr.map{ Path(it) } }
 
             init {
                 parser.parse(args)
