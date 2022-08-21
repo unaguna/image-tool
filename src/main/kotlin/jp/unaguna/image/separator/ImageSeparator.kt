@@ -1,5 +1,11 @@
 package jp.unaguna.image.separator
 
+import jakarta.validation.Validation
+import jakarta.validation.constraints.Min
+import jakarta.validation.constraints.NotBlank
+import kotlinx.cli.ArgParser
+import kotlinx.cli.ArgType
+import kotlinx.cli.default
 import java.awt.image.BufferedImage
 import java.nio.file.Path
 import javax.imageio.ImageIO
@@ -10,14 +16,38 @@ import kotlin.io.path.nameWithoutExtension
 class ImageSeparator {
     companion object {
         @JvmStatic
-        fun main(args: Array<String>) {
-            // TODO: いい感じに引数をパースする
-            val colNum = args[0].toInt()
-            val rowNum = args[1].toInt()
-            val inputPath = Path(args[2])
-            val reverseCol = true
+        fun main(args_: Array<String>) {
+            val args = Args(args_)
 
-            separateOneImage(inputPath, colNum, rowNum, reverseCol)
+            separateOneImage(args.inputPath, args.colNum, args.rowNum, args.reverseCol)
+        }
+
+        private class Args(args: Array<String>) {
+            private val parser = ArgParser(ImageSeparator::class.qualifiedName ?: "")
+
+            @get:Min(1, message = "column must be positive number")
+            val colNum by parser.option(ArgType.Int, shortName = "c", fullName = "column").default(1)
+
+            @get:Min(1, message = "row must be positive number")
+            val rowNum by parser.option(ArgType.Int, shortName = "r", fullName = "row").default(1)
+
+            val reverseCol by parser.option(ArgType.Boolean, fullName = "reverse-col").default(false)
+
+            @get:NotBlank(message = "input_path must not be blank")
+            val inputPathStr by parser.argument(ArgType.String, fullName = "input_path")
+
+            val inputPath by lazy { Path(inputPathStr) }
+
+            init {
+                parser.parse(args)
+
+                val valFactory = Validation.buildDefaultValidatorFactory()
+                val validator = valFactory.validator
+                val violations = validator.validate(this)
+                if (violations.isNotEmpty()) {
+                    throw IllegalArgumentException(violations.joinToString(System.lineSeparator()) { it.message })
+                }
+            }
         }
 
         private fun separateOneImage(inputPath: Path, colNum: Int, rowNum: Int, reverseCol: Boolean) {
