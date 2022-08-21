@@ -1,7 +1,5 @@
 package jp.unaguna.image.separator
 
-import jakarta.validation.Validation
-import jakarta.validation.constraints.Min
 import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
 import kotlinx.cli.default
@@ -27,10 +25,8 @@ class ImageSeparator {
         private class Args(args: Array<String>) {
             private val parser = ArgParser(ImageSeparator::class.qualifiedName ?: "")
 
-            @get:Min(1, message = "column must be positive number")
             val colNum by parser.option(ArgType.Int, shortName = "c", fullName = "column").default(1)
 
-            @get:Min(1, message = "row must be positive number")
             val rowNum by parser.option(ArgType.Int, shortName = "r", fullName = "row").default(1)
 
             val reverseCol by parser.option(ArgType.Boolean, fullName = "reverse-col").default(false)
@@ -41,13 +37,6 @@ class ImageSeparator {
 
             init {
                 parser.parse(args)
-
-                val valFactory = Validation.buildDefaultValidatorFactory()
-                val validator = valFactory.validator
-                val violations = validator.validate(this)
-                if (violations.isNotEmpty()) {
-                    throw IllegalArgumentException(violations.joinToString(System.lineSeparator()) { it.message })
-                }
             }
         }
 
